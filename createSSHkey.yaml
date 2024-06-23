@@ -1,0 +1,54 @@
+---
+- name: Playbook to create SSH key pair
+  hosts: localhost
+  gather_facts: false
+  
+  vars_prompt:
+    - name: "sshKeyFolder"
+      prompt: "Define the SSH key pair storage folder:"
+      default: "~/.ssh"
+      private: no
+
+    - name: "hostName"
+      prompt: "Define the Host Name:"
+      default: "example.local"
+      private: no
+
+    - name: "hostIP"
+      prompt: "Define the Host IP:"
+      default: "0.0.0.0"
+      private: no
+      
+    - name: "sshKeyPassword"
+      prompt: "Define the password for SSH Private Key:"
+      unsafe: true
+      default: ""
+      private: no
+
+  vars:
+    sshCipher: "ed25519"
+
+  tasks:
+    - name: Check if SSH key already exists
+      stat:
+        path: "{{ sshKeyFolder }}/{{ hostIP }}.{{ hostName }}.key"
+      register: ssh_key_stat
+
+    - name: Fail if SSH key already exists
+      fail:
+        msg: "SSH key {{ sshKeyFolder }}/{{ hostIP }}.{{ hostName }}.key already exists!"
+      when: ssh_key_stat.stat.exists
+  
+    - name: Generate SSH key pair
+      community.crypto.openssh_keypair:
+        path: "{{ sshKeyFolder }}/{{ hostIP }}.{{ hostName }}.key"
+        type: "{{ sshCipher }}"
+        passphrase: "{{ sshKeyPassword }}"
+        comment: "{{ hostIP }}.{{ hostName }}"
+      register: ssh_key
+
+    - name: Display generated SSH key information
+      debug:
+        msg: "Generated SSH key with fingerprint: {{ ssh_key.fingerprint }}"
+      when: ssh_key is defined
+

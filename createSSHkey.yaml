@@ -23,7 +23,6 @@
       prompt: "Define the password for SSH Private Key:"
       unsafe: true
       default: ""
-      private: no
       private: yes  # Set private to yes to hide input  (default is no)
       
   vars:

@@ -24,7 +24,8 @@
       unsafe: true
       default: ""
       private: no
-
+      private: yes  # Set private to yes to hide input  (default is no)
+      
   vars:
     sshCipher: "ed25519"
 
